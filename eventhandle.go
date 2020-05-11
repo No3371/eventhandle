@@ -10,6 +10,15 @@ type EventHandle struct {
 	lock        *sync.RWMutex
 }
 
+type EventSubscribingHandle interface {
+	Subscribe(bufferSize int) (newSubscriber chan interface{})
+	Unsubscribe(oldSubscriber chan interface{})
+}
+
+type EventPublishingHandle interface {
+	Publish(event interface{})
+}
+
 func NewHandle(ID string, initCap int) *EventHandle {
 	eh := &EventHandle{
 		id:          ID,
