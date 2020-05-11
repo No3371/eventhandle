@@ -4,22 +4,26 @@ import (
 	"sync"
 )
 
-type eventHandle struct {
-	ID          string
+type EventHandle struct {
+	id          string
 	subscribers []chan interface{}
 	lock        *sync.RWMutex
 }
 
-func NewHandle(ID string, initCap int) *eventHandle {
-	eh := &eventHandle{
-		ID:          ID,
+func NewHandle(ID string, initCap int) *EventHandle {
+	eh := &EventHandle{
+		id:          ID,
 		subscribers: make([]chan interface{}, 0, initCap),
 		lock:        new(sync.RWMutex),
 	}
 	return eh
 }
 
-func (eh *eventHandle) Subscribe(bufferSize int) (newSubscriber chan interface{}) {
+func (eh *EventHandle) ID() string {
+	return eh.id
+}
+
+func (eh *EventHandle) Subscribe(bufferSize int) (newSubscriber chan interface{}) {
 	eh.lock.Lock()
 	defer eh.lock.Unlock()
 	newSubscriber = make(chan interface{}, bufferSize)
@@ -27,7 +31,7 @@ func (eh *eventHandle) Subscribe(bufferSize int) (newSubscriber chan interface{}
 	return newSubscriber
 }
 
-func (eh *eventHandle) Unsubscribe(oldSubscriber chan interface{}) {
+func (eh *EventHandle) Unsubscribe(oldSubscriber chan interface{}) {
 	eh.lock.Lock()
 	defer eh.lock.Unlock()
 	for i, s := range eh.subscribers {
@@ -48,7 +52,7 @@ func (eh *eventHandle) Unsubscribe(oldSubscriber chan interface{}) {
 	}
 }
 
-func (eh *eventHandle) Publish(event interface{}) {
+func (eh *EventHandle) Publish(event interface{}) {
 	eh.lock.RLock()
 	defer eh.lock.RUnlock()
 	for _, s := range eh.subscribers {
