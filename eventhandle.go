@@ -10,6 +10,15 @@ type eventHandle struct {
 	lock        *sync.RWMutex
 }
 
+func NewHandle(ID string, initCap int) *eventHandle {
+	eh := &eventHandle{
+		ID:          ID,
+		subscribers: make([]chan interface{}, 0, initCap),
+		lock:        new(sync.RWMutex),
+	}
+	return eh
+}
+
 func (eh *eventHandle) Subscribe(bufferSize int) (newSubscriber chan interface{}) {
 	eh.lock.Lock()
 	defer eh.lock.Unlock()
